@@ -1,0 +1,1 @@
+# This file is now obsolete. All configuration is handled in settings.py or per-spider custom_settings.

@@ -1,0 +1,13 @@
+# List of keywords for filtering threads
+Violate
+Traffic violation
+Mistake
+Error
+Illegal
+Go straight
+Turn left
+Turn right
+Merge
+Change lane
+Crash
+Accident
