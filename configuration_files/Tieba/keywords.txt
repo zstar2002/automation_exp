@@ -1,0 +1,10 @@
+# List of keywords for filtering threads
+违章
+事故
+错误
+违法
+直行
+左转
+右转
+并道
+如何处理
