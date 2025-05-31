@@ -73,7 +73,7 @@ Each spider run will create a new log file with the spider name and start time i
 
 ### Per-Site Configuration
 
-- All configuration files (`start_urls.json`, `keywords.txt`) are now stored in `configuration_files/<website>/` (e.g., `configuration_files/clubautohome/`).
+- All configuration files (`start_urls.json`, `keywords.txt`) are now stored in `configuration_files/<website>/` (e.g., `configuration_files/clubautohome/`, `configuration_files/Tieba/`).
 - The `spiders` folder should NOT contain any config, keywords, or start_urls files.
 - Spiders load only data files (such as `keywords.txt` and `start_urls.json`) from the appropriate `configuration_files/<website>/` directory. **All spider-specific settings are now defined directly in each spider's Python file using the `custom_settings` attribute. No spider loads configuration or settings from any external config file.**
 
@@ -82,6 +82,8 @@ Each spider run will create a new log file with the spider name and start time i
 - Spiders and test scripts are named to reflect the website they target, e.g.:
   - `clubautohome_forum_posts_spider.py`
   - `clubautohome_content_spider.py`
+  - `tieba_forum_posts_spider.py`
+  - `tieba_content_spider.py`
   - `test_clubautohome_automation.py`
 
 ### Output and Logging
@@ -151,3 +153,10 @@ This project is licensed under the MIT License. See the LICENSE file for details
 ## Acknowledgements
 
 - [Scrapy](https://scrapy.org/) - An open-source and collaborative web crawling framework for Python.
+
+- `tieba_forum_posts_spider.py`: Scrapes thread titles and links from Baidu Tieba forums using keywords and start URLs from `configuration_files/Tieba/`.
+- `tieba_content_spider.py`: Scrapes post content from Baidu Tieba threads listed in a `thread_urls.csv` file in the `spiders/` folder.
+
+## Usage for Baidu Tieba
+
+- For Baidu Tieba, use `tieba_forum_posts_spider.py` to crawl thread links and `tieba_content_spider.py` to crawl post content from those threads. Place your `keywords.txt` and `start_urls.json` in `configuration_files/Tieba/` and your `thread_urls.csv` in the `spiders/` folder.
