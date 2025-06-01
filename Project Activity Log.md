@@ -12,3 +12,16 @@
 ### Documentation
 
 - Updated `README.md` to reflect the addition of Baidu Tieba spiders, their configuration, and usage instructions.
+
+## 2025-06-01
+
+### Added Test Automation for Baidu Tieba Spiders
+
+- Created `test_tieba_forum_posts_spider.py` to automate running the `tieba_forum_posts_spider`.
+  - Output CSV files are named as `tieba_forum_threads_YYYYMMDD_HHMMSS.csv` and saved in the `forum_threads/` folder.
+  - Log files are named as `tieba_forum_posts_spider_YYYYMMDD_HHMMSS.log` and saved in the top-level `logs/` directory.
+- Created `test_tieba_content_spider.py` to automate running the `tieba_content_spider`.
+  - Output CSV files are named as `tieba_post_content_YYYYMMDD_HHMMSS.csv` and saved in the `automation_exp_output/` folder.
+  - Log files are named as `tieba_content_spider_YYYYMMDD_HHMMSS.log` and saved in the `automation_exp_log/` directory.
+- Both scripts follow the same conventions as the clubautohome test automation scripts, including automatic creation of output and log directories and timestamped file naming.
+- Updated the `README.md` to document the usage and conventions for the new Tieba test automation scripts.

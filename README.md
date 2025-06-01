@@ -160,3 +160,35 @@ This project is licensed under the MIT License. See the LICENSE file for details
 ## Usage for Baidu Tieba
 
 - For Baidu Tieba, use `tieba_forum_posts_spider.py` to crawl thread links and `tieba_content_spider.py` to crawl post content from those threads. Place your `keywords.txt` and `start_urls.json` in `configuration_files/Tieba/` and your `thread_urls.csv` in the `spiders/` folder.
+
+## Test Automation for Baidu Tieba Spiders
+
+### Running Tieba Forum Posts Spider
+
+To automatically crawl Baidu Tieba forum thread links and save the output to a timestamped CSV file, run:
+
+```powershell
+python automation_exp/test_file/test_tieba_forum_posts_spider.py
+```
+
+- This will run the `tieba_forum_posts_spider`.
+- Output is saved as `tieba_forum_threads_YYYYMMDD_HHMMSS.csv` in the `forum_threads/` folder.
+- Log files are named as `tieba_forum_posts_spider_YYYYMMDD_HHMMSS.log` and saved in the top-level `logs/` directory.
+
+### Running Tieba Content Spider
+
+To crawl post content from Baidu Tieba threads listed in `thread_urls.csv`, run:
+
+```powershell
+python automation_exp/test_file/test_tieba_content_spider.py
+```
+
+- This will run the `tieba_content_spider`.
+- Output is saved as `tieba_post_content_YYYYMMDD_HHMMSS.csv` in the `automation_exp_output/` folder.
+- Log files are named as `tieba_content_spider_YYYYMMDD_HHMMSS.log` and saved in the `automation_exp_log/` directory.
+
+### Notes
+
+- Both test scripts follow the same automation and output/logging conventions as the clubautohome scripts.
+- Output and log directories are created automatically if they do not exist.
+- See the `test_file/` directory for all available test automation scripts for each site and spider.
