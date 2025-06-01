@@ -69,7 +69,7 @@ class TiebaForumPostsSpider(scrapy.Spider):
         self.driver.get(response.url)
         try:
             WebDriverWait(self.driver, 15).until(
-                EC.visibility_of_element_located((By.CSS_SELECTOR, "ul#thread_list"))
+                EC.visibility_of_element_located((By.CSS_SELECTOR, "div > ul#thread_list.threadlist_bright"))
             )
             self.logger.debug("Successfully found the thread list element")
         except WebDriverException as e:
@@ -100,7 +100,7 @@ class TiebaForumPostsSpider(scrapy.Spider):
             )
             self.forum_stats[forum_name]['pages'] += 1
             page_count += 1
-            posts = selenium_response.css('ul#thread_list > li.j_thread_list')
+            posts = selenium_response.css('ul#thread_list.threadlist_bright > li.j_thread_list')
             if not posts:
                 self.logger.debug("No posts found with the selector 'ul#thread_list > li.j_thread_list'")
             self.forum_stats[forum_name]['posts_crawled'] += len(posts)
@@ -137,7 +137,7 @@ class TiebaForumPostsSpider(scrapy.Spider):
                     delay = random.uniform(2, 3)
                     time.sleep(delay)
                     WebDriverWait(self.driver, 10).until(
-                        lambda driver: driver.find_element(By.CSS_SELECTOR, "ul#thread_list")
+                        lambda driver: driver.find_element(By.CSS_SELECTOR, "div > ul#thread_list.threadlist_bright")
                     )
                     next_found = True
                     break
