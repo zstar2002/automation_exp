@@ -28,27 +28,32 @@ def filter_link(link_info, keyword_pattern, start_date):
     Filters a single link based on the specified keyword pattern and date range.
 
     Parameters:
-    link_info (dict): Dictionary containing 'link' and 'date' keys. 'date' key value should be a dateime object.
+    link_info (dict): Dictionary containing 'link' and 'date' keys. 'date' key value should be a datetime string or None.
     keyword_pattern (re.Pattern): Compiled regular expression pattern for keywords.
     start_date (datetime): Start date as datetime object.
 
     Returns:
     str or None: The link if it matches the criteria, None otherwise.
-    
     """
-    
     link = link_info['link']
     date_str = link_info['date']
-    
+
+    # If no date is provided, only filter by keyword
+    if date_str is None:
+        if keyword_pattern.search(link):
+            return link
+        else:
+            return None
+
     # Convert link date to datetime object
     link_date = datetime.strptime(date_str, '%Y-%m-%dT%H:%M:%S%z')
-    
+
     # Convert start_date to timezone-aware datetime object
     start_date = start_date.replace(tzinfo=pytz.UTC)
-    
+
     # Get the current date and convert it to timezone-aware datetime object
     end_date = datetime.now(pytz.UTC)
-    
+
     # Check if link matches the keyword pattern and is within the date range
     if keyword_pattern.search(link) and start_date <= link_date <= end_date:
         return link

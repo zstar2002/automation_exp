@@ -117,7 +117,8 @@ class TiebaForumPostsSpider(scrapy.Spider):
                     yield {
                         'post_title': post_title,
                         'post_link': 'https://tieba.baidu.com/' + post_link.lstrip('/'),
-                        'forum_name': forum_name,
+                        'post_date': None,         # Tieba does not offer thread creation date; only the date of last reply
+                        'forum_name': forum_name, 
                         'forum_url': forum_url
                     }
             # --- Next Page Handling ---

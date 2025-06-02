@@ -4,8 +4,9 @@ from datetime import datetime
 
 def run_scrapy_spider():
     """Run the Tesla Owners Online forum posts spider and capture its output."""
-    # Create the output directory if it doesn't exist
-    output_dir = os.path.join(os.path.dirname(__file__), '../forum_threads')
+    # Set the output directory to the specified path
+    base_dir = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+    output_dir = os.path.join(base_dir, 'automation_exp_output')
     os.makedirs(output_dir, exist_ok=True)
 
     # Generate the output CSV filename with timestamp
@@ -13,9 +14,8 @@ def run_scrapy_spider():
     output_filename = f'teslaownersonline_forum_threads_{current_time}.csv'
     output_path = os.path.join(output_dir, output_filename)
 
-    # Generate the log file name with spider name and timestamp
-    project_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-    log_dir = os.path.join(project_root, 'logs')
+    # Set the log directory to the specified path
+    log_dir = os.path.join(base_dir, 'automation_exp_log')
     os.makedirs(log_dir, exist_ok=True)
     log_filename = f'teslaownersonline_forum_posts_spider_{current_time}.log'
     log_path = os.path.join(log_dir, log_filename)

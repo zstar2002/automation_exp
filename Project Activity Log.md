@@ -25,3 +25,16 @@
   - Log files are named as `tieba_content_spider_YYYYMMDD_HHMMSS.log` and saved in the `automation_exp_log/` directory.
 - Both scripts follow the same conventions as the clubautohome test automation scripts, including automatic creation of output and log directories and timestamped file naming.
 - Updated the `README.md` to document the usage and conventions for the new Tieba test automation scripts.
+
+## 2025-06-02
+
+### Filtering Logic Update
+
+- Updated `filter_link` in `utils.py` so that if a forum thread does not provide a creation date (`date` is None), the filter will only apply keyword matching and will not exclude the thread based on date. This allows threads without a date to be included if they match the keywords.
+
+### Output and Log Directory Convention Update
+
+- All spider output files are now saved in `C:\Users\maste\PythonProjects\automation_exp_output`.
+- All log files are now saved in `C:\Users\maste\PythonProjects\automation_exp_log`.
+- All test automation scripts have been updated to use these directories for output and logs.
+- Documentation in `README.md` updated to reflect this change.

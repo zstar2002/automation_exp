@@ -11,6 +11,8 @@
 - **Automated crawling and output saving:** Running the automation script will automatically run the forum spider and save results to a timestamped CSV file in a dedicated folder.
 - **Forum-level statistics:** The spider tracks and logs, for each forum, the number of pages crawled, posts crawled (before filtering), and posts yielded (after filtering).
 - **Per-site configuration:** All configuration, keywords, and start URLs are loaded from `configuration_files/<website>/` (e.g., `configuration_files/clubautohome/`).
+- **Flexible filtering:** If a forum thread does not provide a creation date, the filter will only apply keyword matching and will not exclude the thread based on date.
+- **Centralized Output and Log Storage:** All spider output files are saved in `C:\Users\maste\PythonProjects\automation_exp_output` and all log files are saved in `C:\Users\maste\PythonProjects\automation_exp_log`.
 
 ## Installation
 
@@ -62,12 +64,12 @@ python automation_exp/test_clubautohome_automation.py
 This will:
 - Run the `clubautohome_forum_posts_spider` automatically.
 - Save the output as a CSV file named like `clubautohome_forum_threads_YYYYMMDD_HHMMSS.csv`.
-- Place the output file in the `automation_exp/forum_threads/` folder (created if it does not exist).
+- Place the output file in the `C:\Users\maste\PythonProjects\automation_exp_output` folder (created if it does not exist).
 - After crawling, the spider logs per-forum statistics (pages crawled, posts crawled, posts yielded) in the log file for each run.
 
 ### 3. Log Files
 
-Each spider run will create a new log file with the spider name and start time in its name. The log file will contain information about when the spider started and how long it took to complete the task. Log files are saved in the `automation_exp/logs/` directory. Only one top-level `logs` directory is used for all log files.
+Each spider run will create a new log file with the spider name and start time in its name. The log file will contain information about when the spider started and how long it took to complete the task. Log files are saved in the `C:\Users\maste\PythonProjects\automation_exp_log` directory. Only one top-level log directory is used for all log files.
 
 ## Project Configuration and Structure (Updated 2025-05-20)
 
@@ -90,7 +92,8 @@ Each spider run will create a new log file with the spider name and start time i
 
 - Output CSV files always include the website name and a timestamp, e.g. `clubautohome_forum_threads_YYYYMMDD_HHMMSS.csv`.
 - Log files are named with the spider name and timestamp, e.g. `clubautohome_forum_posts_spider_YYYYMMDD_HHMMSS.log`.
-- All logs are written to a single top-level `logs/` directory to avoid confusion.
+- All logs are written to a single top-level `C:\Users\maste\PythonProjects\automation_exp_log` directory to avoid confusion.
+- All spider output files are written to `C:\Users\maste\PythonProjects\automation_exp_output`.
 
 ### Running the Spider
 
@@ -127,8 +130,8 @@ Each spider run will create a new log file with the spider name and start time i
 - `middlewares.py`: Contains custom middlewares, including logging middleware.
 - `pipelines.py`: Defines the item processing pipeline.
 - `settings.py`: Scrapy settings for the project.
-- `forum_threads/`: Output folder for all forum spider CSV files.
-- `logs/`: Log files for each spider run. All logs are stored here, not in subfolders.
+- `C:\Users\maste\PythonProjects\automation_exp_output/`: Output folder for all spider CSV files.
+- `C:\Users\maste\PythonProjects\automation_exp_log/`: Log files for each spider run. All logs are stored here, not in subfolders.
 - `configuration_files/<website>/`: Per-site configuration, keywords, and start URLs. **All config, keywords, and start_urls files must be here.**
 - `test_clubautohome_automation.py`: Script to run the clubautohome forum spider and save output automatically.
 
@@ -172,8 +175,8 @@ python automation_exp/test_file/test_tieba_forum_posts_spider.py
 ```
 
 - This will run the `tieba_forum_posts_spider`.
-- Output is saved as `tieba_forum_threads_YYYYMMDD_HHMMSS.csv` in the `forum_threads/` folder.
-- Log files are named as `tieba_forum_posts_spider_YYYYMMDD_HHMMSS.log` and saved in the top-level `logs/` directory.
+- Output is saved as `tieba_forum_threads_YYYYMMDD_HHMMSS.csv` in the `C:\Users\maste\PythonProjects\automation_exp_output` folder.
+- Log files are named as `tieba_forum_posts_spider_YYYYMMDD_HHMMSS.log` and saved in the top-level `C:\Users\maste\PythonProjects\automation_exp_log` directory.
 
 ### Running Tieba Content Spider
 
@@ -184,8 +187,8 @@ python automation_exp/test_file/test_tieba_content_spider.py
 ```
 
 - This will run the `tieba_content_spider`.
-- Output is saved as `tieba_post_content_YYYYMMDD_HHMMSS.csv` in the `automation_exp_output/` folder.
-- Log files are named as `tieba_content_spider_YYYYMMDD_HHMMSS.log` and saved in the `automation_exp_log/` directory.
+- Output is saved as `tieba_post_content_YYYYMMDD_HHMMSS.csv` in the `C:\Users\maste\PythonProjects\automation_exp_output` folder.
+- Log files are named as `tieba_content_spider_YYYYMMDD_HHMMSS.log` and saved in the `C:\Users\maste\PythonProjects\automation_exp_log` directory.
 
 ### Notes
 
