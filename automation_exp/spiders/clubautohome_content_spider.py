@@ -40,13 +40,27 @@ class ClubAutohomeContentSpider(scrapy.Spider):
             writer.writerows(data)
     
     def find_latest_csv(self):
-        """Find the newest CSV file in forum_threads starting with 'clubautohome'."""
-        forum_threads_dir = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'forum_threads')
-        pattern = os.path.join(forum_threads_dir, 'clubautohome*.csv')
+        """Find the newest CSV file in automation_exp_output starting with 'clubautohome_forum_threads_'."""
+        # Get the current script directory
+        current_dir = os.path.dirname(os.path.abspath(__file__))
+    
+        # Navigate to project root (3 levels up from spiders folder)
+        project_root = os.path.dirname(os.path.dirname(os.path.dirname(current_dir)))
+    
+        # Path to output directory
+        output_dir = os.path.join(project_root, 'automation_exp_output')
+    
+        # Pattern to match CSV files
+        pattern = os.path.join(output_dir, 'clubautohome_forum_threads_*.csv')
+    
+        # Find matching files
         files = glob.glob(pattern)
         if not files:
-            raise FileNotFoundError(f"No CSV files starting with 'clubautohome' found in {forum_threads_dir}")
+            raise FileNotFoundError(f"No CSV files starting with 'clubautohome_forum_threads_' found in {output_dir}")
+    
+        # Return the most recently modified file
         latest_file = max(files, key=os.path.getmtime)
+        self.logger.info(f"Found latest CSV file: {latest_file}")
         return latest_file
 
     def start_requests(self):

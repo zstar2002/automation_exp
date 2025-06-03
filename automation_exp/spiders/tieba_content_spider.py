@@ -2,6 +2,7 @@ import scrapy
 import csv
 import os
 import chardet
+import glob
 from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.chrome.options import Options
@@ -29,6 +30,9 @@ class TiebaContentSpider(scrapy.Spider):
         'DOWNLOAD_DELAY': 3,
         'RANDOMIZE_DOWNLOAD_DELAY': True,
         'FEED_EXPORT_ENCODING': 'utf-8',
+        'ITEM_PIPELINES': {
+            'automation_exp.pipelines.tieba_content_pipeline.TiebaContentPipeline': 300,
+        }
     }
 
     def __init__(self, *args, **kwargs):
@@ -46,26 +50,44 @@ class TiebaContentSpider(scrapy.Spider):
             self.logger.error(f"Failed to initialize ChromeDriver: {e}")
             raise
 
+    def find_latest_csv(self):
+        """Find the newest CSV file in automation_exp_output starting with 'tieba_forum_threads_'."""
+        current_dir = os.path.dirname(os.path.abspath(__file__))
+        project_root = os.path.dirname(os.path.dirname(os.path.dirname(current_dir)))
+        output_dir = os.path.join(project_root, 'automation_exp_output')
+        pattern = os.path.join(output_dir, 'tieba_forum_threads_*.csv')
+        files = glob.glob(pattern)
+        if not files:
+            raise FileNotFoundError(f"No CSV files starting with 'tieba_forum_threads_' found in {output_dir}")
+        latest_file = max(files, key=os.path.getmtime)
+        self.logger.info(f"Found latest CSV file: {latest_file}")
+        return latest_file
+
     def start_requests(self):
         try:
             urls = []
-            csv_file_path = os.path.join(os.path.dirname(__file__), 'thread_urls.csv')
+            csv_file_path = self.find_latest_csv()
+            self.logger.info(f"Using CSV file: {csv_file_path}")
             with open(csv_file_path, 'rb') as file:
                 raw_data = file.read()
                 result = chardet.detect(raw_data)
                 encoding = result['encoding']
+            if encoding.lower() not in ['utf-8', 'utf-16', 'gbk']:
+                self.logger.debug(f"Detected encoding {encoding} may not support Chinese characters. Defaulting to UTF-8.")
+                encoding = 'utf-8'
             with open(csv_file_path, 'r', encoding=encoding) as file:
                 reader = csv.DictReader(file)
                 for row in reader:
                     thread = {}
-                    thread['thread_title'] = row['thread_title']
-                    thread['thread_link'] = row['thread_link']
-                    urls.append(thread)
-                    self.logger.debug(f"Obtained URL: {thread['thread_link']} from CSV")
+                    thread['thread_title'] = row.get('thread_title')
+                    thread['thread_link'] = row.get('thread_link')
+                    if thread['thread_title'] and thread['thread_link']:
+                        urls.append(thread)
+                        self.logger.debug(f"Obtained URL: {thread['thread_link']} from CSV")
             for url in urls:
                 yield scrapy.Request(url=url['thread_link'], callback=self.parse, meta=url)
         except Exception as e:
-            self.logger.error(f"Error while obtaining start requests: {e}")
+            self.logger.debug(f"Error while obtaining start requests: {e}")
 
     def parse(self, response):
         self.logger.debug(f"Processing URL: {response.url}")

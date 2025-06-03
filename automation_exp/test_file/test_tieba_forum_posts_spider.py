@@ -4,9 +4,14 @@ from datetime import datetime
 
 def run_scrapy_spider():
     """Run the Tieba forum posts spider and capture its output."""
-    # Set the output directory to the specified path
-    base_dir = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-    output_dir = os.path.join(base_dir, 'automation_exp_output')
+    # Get the current script directory
+    current_dir = os.path.dirname(os.path.abspath(__file__))
+    
+    # Navigate to project root (3 levels up from test_file folder)
+    project_root = os.path.dirname(os.path.dirname(os.path.dirname(current_dir)))
+    
+    # Path to output directory
+    output_dir = os.path.join(project_root, 'automation_exp_output')
     os.makedirs(output_dir, exist_ok=True)
 
     # Generate the output CSV filename with timestamp
@@ -15,7 +20,7 @@ def run_scrapy_spider():
     output_path = os.path.join(output_dir, output_filename)
 
     # Set the log directory to the specified path
-    log_dir = os.path.join(base_dir, 'automation_exp_log')
+    log_dir = os.path.join(project_root, 'automation_exp_log')
     os.makedirs(log_dir, exist_ok=True)
     log_filename = f'tieba_forum_posts_spider_{current_time}.log'
     log_path = os.path.join(log_dir, log_filename)
