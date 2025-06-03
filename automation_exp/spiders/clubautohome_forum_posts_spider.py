@@ -13,6 +13,7 @@ from datetime import datetime, timedelta, timezone
 import re
 import time
 import random
+from webdriver_manager.chrome import ChromeDriverManager  # Add this import
 
 class ClubAutohomeForumPostsSpider(scrapy.Spider):
     name = "clubautohome_forum_posts_spider"
@@ -53,11 +54,11 @@ class ClubAutohomeForumPostsSpider(scrapy.Spider):
         # chrome_options.add_argument("--headless")  # Uncomment to run in headless mode
 
         try:
-            driver_path = r"C:\Users\maste\.wdm\drivers\chromedriver\win64\135.0.7049.114\chromedriver-win32\chromedriver.exe"
+            driver_path = r"C:\Users\maste\.wdm\drivers\chromedriver\win64\chromedriver-win64\chromedriver.exe"
             self.driver = webdriver.Chrome(
                 service=Service(driver_path),
                 options=chrome_options
-            )
+            )    
         except WebDriverException as e:
             self.logger.error(f"Failed to initialize ChromeDriver: {e}")
             raise
