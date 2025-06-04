@@ -1,0 +1,54 @@
+2025-06-04 11:32:42 [scrapy.utils.log] INFO: Scrapy 2.11.2 started (bot: automation_exp)
+2025-06-04 11:32:42 [scrapy.utils.log] INFO: Versions: lxml 4.9.2.0, libxml2 2.9.12, cssselect 1.2.0, parsel 1.9.1, w3lib 2.2.1, Twisted 24.3.0, Python 3.9.6 (tags/v3.9.6:db3ff76, Jun 28 2021, 15:26:21) [MSC v.1929 64 bit (AMD64)], pyOpenSSL 24.1.0 (OpenSSL 3.2.2 4 Jun 2024), cryptography 42.0.8, Platform Windows-10-10.0.26100-SP0
+2025-06-04 11:32:42 [scrapy.addons] INFO: Enabled addons:
+[]
+2025-06-04 11:32:42 [asyncio] DEBUG: Using selector: SelectSelector
+2025-06-04 11:32:42 [scrapy.utils.log] DEBUG: Using reactor: twisted.internet.asyncioreactor.AsyncioSelectorReactor
+2025-06-04 11:32:42 [scrapy.utils.log] DEBUG: Using asyncio event loop: asyncio.windows_events._WindowsSelectorEventLoop
+2025-06-04 11:32:42 [scrapy.extensions.telnet] INFO: Telnet Password: 37418252eb258e35
+2025-06-04 11:32:42 [scrapy.middleware] INFO: Enabled extensions:
+['scrapy.extensions.corestats.CoreStats',
+ 'scrapy.extensions.telnet.TelnetConsole']
+2025-06-04 11:32:42 [scrapy.crawler] INFO: Overridden settings:
+{'BOT_NAME': 'automation_exp',
+ 'DOWNLOAD_DELAY': 2,
+ 'DUPEFILTER_CLASS': 'scrapy.dupefilters.BaseDupeFilter',
+ 'FEED_EXPORT_ENCODING': 'utf-8',
+ 'LOGSTATS_INTERVAL': 0,
+ 'LOG_FILE': 'logs/automation_exp_2025-06-04_11-32-40.log',
+ 'NEWSPIDER_MODULE': 'automation_exp.spiders',
+ 'REQUEST_FINGERPRINTER_IMPLEMENTATION': '2.7',
+ 'ROBOTSTXT_OBEY': True,
+ 'SPIDER_MODULES': ['automation_exp.spiders'],
+ 'TWISTED_REACTOR': 'twisted.internet.asyncioreactor.AsyncioSelectorReactor',
+ 'USER_AGENT': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 '
+               '(KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36'}
+2025-06-04 11:32:43 [scrapy.middleware] INFO: Enabled downloader middlewares:
+['scrapy.downloadermiddlewares.offsite.OffsiteMiddleware',
+ 'scrapy.downloadermiddlewares.robotstxt.RobotsTxtMiddleware',
+ 'scrapy.downloadermiddlewares.httpauth.HttpAuthMiddleware',
+ 'scrapy.downloadermiddlewares.downloadtimeout.DownloadTimeoutMiddleware',
+ 'scrapy.downloadermiddlewares.defaultheaders.DefaultHeadersMiddleware',
+ 'scrapy.downloadermiddlewares.useragent.UserAgentMiddleware',
+ 'scrapy.downloadermiddlewares.retry.RetryMiddleware',
+ 'scrapy.downloadermiddlewares.redirect.MetaRefreshMiddleware',
+ 'scrapy.downloadermiddlewares.httpcompression.HttpCompressionMiddleware',
+ 'scrapy.downloadermiddlewares.redirect.RedirectMiddleware',
+ 'scrapy.downloadermiddlewares.cookies.CookiesMiddleware',
+ 'scrapy.downloadermiddlewares.httpproxy.HttpProxyMiddleware',
+ 'scrapy.downloadermiddlewares.stats.DownloaderStats']
+2025-06-04 11:32:43 [scrapy.middleware] INFO: Enabled spider middlewares:
+['scrapy.spidermiddlewares.httperror.HttpErrorMiddleware',
+ 'automation_exp.middlewares.LoggingMiddleware',
+ 'scrapy.spidermiddlewares.referer.RefererMiddleware',
+ 'scrapy.spidermiddlewares.urllength.UrlLengthMiddleware',
+ 'scrapy.spidermiddlewares.depth.DepthMiddleware']
+2025-06-04 11:32:43 [scrapy.middleware] INFO: Enabled item pipelines:
+[]
+2025-06-04 11:32:43 [scrapy.extensions.telnet] INFO: Telnet console listening on 127.0.0.1:6023
+2025-06-04 11:32:43 [asyncio] DEBUG: Using selector: SelectSelector
+2025-06-04 11:33:09 [scrapy.core.engine] INFO: Spider opened
+2025-06-04 11:33:09 [root] INFO: Spider default started at 2025-06-04 11:33:09
+2025-06-04 11:33:20 [scrapy.core.engine] DEBUG: Crawled (409) <GET https://www.teslaownersonline.com/robots.txt> (referer: None)
+2025-06-04 11:33:30 [scrapy.core.engine] DEBUG: Crawled (409) <GET https://www.teslaownersonline.com/> (referer: None)
+2025-06-04 11:35:06 [scrapy.core.engine] DEBUG: Crawled (409) <GET https://www.teslaownersonline.com/forums/tesla-discussions.32/> (referer: None)

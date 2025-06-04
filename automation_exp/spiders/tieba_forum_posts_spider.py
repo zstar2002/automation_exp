@@ -50,7 +50,7 @@ class TiebaForumPostsSpider(scrapy.Spider):
         chrome_options.add_argument('--log-level=3')
         # chrome_options.add_argument("--headless")
         try:
-            driver_path = r"C:\\Users\\maste\\.wdm\\drivers\\chromedriver\\win64\\135.0.7049.114\\chromedriver-win32\\chromedriver.exe"
+            driver_path = r"C:\Users\maste\.wdm\drivers\chromedriver\win64\chromedriver-win64\chromedriver.exe"
             self.driver = webdriver.Chrome(
                 service=Service(driver_path),
                 options=chrome_options

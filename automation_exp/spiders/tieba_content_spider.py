@@ -13,6 +13,10 @@ from selenium.common.exceptions import WebDriverException
 from automation_exp.items import AutomationExpItem
 import time
 import random
+import re
+
+def extract_position_and_date(tail_infos):
+    raise NotImplementedError
 
 class TiebaContentSpider(scrapy.Spider):
     name = "tieba_content_spider"
@@ -41,7 +45,7 @@ class TiebaContentSpider(scrapy.Spider):
         chrome_options.add_argument('--log-level=3')
         # chrome_options.add_argument("--headless")
         try:
-            driver_path = r"C:\\Users\\maste\\.wdm\\drivers\\chromedriver\\win64\\135.0.7049.114\\chromedriver-win32\\chromedriver.exe"
+            driver_path = r"C:\Users\maste\.wdm\drivers\chromedriver\win64\chromedriver-win64\chromedriver.exe"
             self.driver = webdriver.Chrome(
                 service=Service(driver_path),
                 options=chrome_options
@@ -52,49 +56,86 @@ class TiebaContentSpider(scrapy.Spider):
 
     def find_latest_csv(self):
         """Find the newest CSV file in automation_exp_output starting with 'tieba_forum_threads_'."""
+        # Get the current script directory
         current_dir = os.path.dirname(os.path.abspath(__file__))
+        
+        # Navigate to project root (3 levels up from spiders folder)
         project_root = os.path.dirname(os.path.dirname(os.path.dirname(current_dir)))
+        
+        # Path to output directory
         output_dir = os.path.join(project_root, 'automation_exp_output')
+        
+         # Pattern to match CSV files
         pattern = os.path.join(output_dir, 'tieba_forum_threads_*.csv')
-        files = glob.glob(pattern)
+        
+        # Find matching files
+        files = glob.glob(pattern)        
         if not files:
             raise FileNotFoundError(f"No CSV files starting with 'tieba_forum_threads_' found in {output_dir}")
+        
+        # Return the most recently modified file
         latest_file = max(files, key=os.path.getmtime)
         self.logger.info(f"Found latest CSV file: {latest_file}")
         return latest_file
+    
+    def extract_position_and_date(tail_infos):
+        """Given a list of span.tail-info texts, return (position, date) based on their format."""
+        position = None
+        date = None
+        date_pattern = re.compile(r"\d{4}-\d{2}-\d{2} \d{2}:\d{2}")
+        for info in tail_infos:
+            if info.endswith("楼"):
+                position = info
+            elif date_pattern.match(info):
+                date = info
+        return position, date
 
     def start_requests(self):
         try:
             urls = []
+            # Find the latest CSV file
             csv_file_path = self.find_latest_csv()
             self.logger.info(f"Using CSV file: {csv_file_path}")
+            
+            # Detect the encoding of the CSV file
             with open(csv_file_path, 'rb') as file:
                 raw_data = file.read()
                 result = chardet.detect(raw_data)
                 encoding = result['encoding']
+            
+            # Ensure encoding is compatible with Chinese characters  
             if encoding.lower() not in ['utf-8', 'utf-16', 'gbk']:
                 self.logger.debug(f"Detected encoding {encoding} may not support Chinese characters. Defaulting to UTF-8.")
                 encoding = 'utf-8'
+                
+            # Read the CSV file with the detected encoding   
             with open(csv_file_path, 'r', encoding=encoding) as file:
                 reader = csv.DictReader(file)
                 for row in reader:
                     thread = {}
+                    # Use the correct column names based on the CSV file structure
                     thread['thread_title'] = row.get('thread_title')
                     thread['thread_link'] = row.get('thread_link')
                     if thread['thread_title'] and thread['thread_link']:
                         urls.append(thread)
                         self.logger.debug(f"Obtained URL: {thread['thread_link']} from CSV")
+                        
             for url in urls:
                 yield scrapy.Request(url=url['thread_link'], callback=self.parse, meta=url)
+                
+                
         except Exception as e:
             self.logger.debug(f"Error while obtaining start requests: {e}")
 
     def parse(self, response):
+        """Parse individual posts. Currently only got the 1st place of the thread."""
+        # Log the URL being processed
         self.logger.debug(f"Processing URL: {response.url}")
         self.driver.get(response.url)
+        
         try:
             WebDriverWait(self.driver, 15).until(
-                EC.visibility_of_element_located((By.CSS_SELECTOR, "div#j_p_postlist"))
+                EC.visibility_of_element_located((By.CSS_SELECTOR, "div.p_postlist"))
             )
             self.logger.debug("Successfully found the post list element")
         except WebDriverException as e:
@@ -106,12 +147,16 @@ class TiebaContentSpider(scrapy.Spider):
                 body=self.driver.page_source,
                 encoding='utf-8'
             )
-            posts = selenium_response.css('div.l_post')
+            posts = selenium_response.css('div.p_postlist > div.l_post')
             for post in posts:
                 item = AutomationExpItem()
                 item['author_id'] = post.css('a.p_author_name::text').get()
-                item['date'] = post.css('span.j_post_time::text').get()
-                item['position'] = post.css('span.floor::text').get()
+                
+                tail_infos = post.css('span.tail-info::text').getall()
+                position, date = extract_position_and_date(tail_infos)
+                item['date'] = date
+                item['position'] = position
+                
                 item['text'] = post.css('div.d_post_content').xpath('string(.)').get()
                 item['thread_title'] = response.meta['thread_title']
                 item['thread_link'] = response.meta['thread_link']
