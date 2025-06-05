@@ -1,6 +1,14 @@
 import scrapy
 import csv
 import os
+from selenium import webdriver
+from selenium.webdriver.common.by import By
+from selenium.webdriver.chrome.options import Options
+from selenium.webdriver.chrome.service import Service
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
+from selenium.common.exceptions import WebDriverException
+from webdriver_manager.chrome import ChromeDriverManager
 import glob
 import chardet
 from automation_exp.items import AutomationExpItem
@@ -28,7 +36,19 @@ class ClubAutohomeContentSpider(scrapy.Spider):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        # No config file loading needed
+        
+        chrome_options = Options()
+        chrome_options.add_argument('--log-level=3')
+        # chrome_options.add_argument("--headless")  # Uncomment for headless mode
+        try:
+            driver_path = r"C:\Users\maste\.wdm\drivers\chromedriver\win64\chromedriver-win64\chromedriver.exe"
+            self.driver = webdriver.Chrome(
+                service=Service(driver_path),
+                options=chrome_options
+            )
+        except WebDriverException as e:
+            self.logger.error(f"Failed to initialize ChromeDriver: {e}")
+            raise
 
     def write_to_csv(self, data, file_path):
         """Write data to a CSV file with proper encoding."""
@@ -108,13 +128,31 @@ class ClubAutohomeContentSpider(scrapy.Spider):
         """Parse individual posts. Currently only got the 1st place of the thread."""
         # Log the URL being processed
         self.logger.debug(f"Processing URL: {response.url}")
-        post = response.css('div.post-container')
+
+        # Use Selenium to load the page and wait for the post container
+        self.driver.get(response.url)
+        try:
+            WebDriverWait(self.driver, 15).until(
+                EC.visibility_of_element_located((By.CSS_SELECTOR, "div.post-container"))
+            )
+            self.logger.debug("Successfully found the post container element with Selenium")
+        except WebDriverException as e:
+            self.logger.error(f"Error loading page with Selenium: {e}")
+            return
+
+        selenium_response = scrapy.http.HtmlResponse(
+            url=response.url,
+            body=self.driver.page_source,
+            encoding='utf-8'
+        )
+
+        post = selenium_response.css('div.post-container')
         if not post:
             self.logger.debug("No posts found with the selector 'div.post-container'")
             return
         
         post_item = AutomationExpItem()
-        post_item['author_id'] = response.css('div.user-name > a.name::text').get()
+        post_item['author_id'] = selenium_response.css('div.user-name > a.name::text').get()
         post_item['date'] = response.meta['thread_date']
         post_item['position'] = 1
         

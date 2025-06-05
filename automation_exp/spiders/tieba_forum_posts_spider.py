@@ -6,7 +6,7 @@ from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
-from selenium.common.exceptions import WebDriverException
+from selenium.common.exceptions import WebDriverException, TimeoutException
 from ..utils import set_filter, filter_link
 from ..utils import load_keywords, load_start_urls
 from datetime import datetime, timedelta, timezone
@@ -66,7 +66,23 @@ class TiebaForumPostsSpider(scrapy.Spider):
 
     def parse(self, response):
         self.logger.debug(f"Processing URL: {response.url}")
-        self.driver.get(response.url)
+        try:
+            self.driver.get(response.url)
+            # Wait for the login pop-up and close it if present
+            try:
+                # Adjust the selector below to match the close button of the Tieba login pop-up
+                close_btn = WebDriverWait(self.driver, 5).until(
+                    EC.element_to_be_clickable((By.CSS_SELECTOR, "div.login-dialog-close, .close, .close-btn"))
+                )
+                close_btn.click()
+                self.logger.info("Closed login pop-up.")
+            except TimeoutException:
+                self.logger.info("No login pop-up appeared.")
+            # ...continue with your scraping logic...
+        except Exception as e:
+            self.logger.error(f"Error loading page: {e}")
+            return
+    
         try:
             WebDriverWait(self.driver, 15).until(
                 EC.visibility_of_element_located((By.CSS_SELECTOR, "div > ul#thread_list.threadlist_bright"))
