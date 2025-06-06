@@ -87,7 +87,6 @@ class ClubAutohomeContentSpider(scrapy.Spider):
         try:
             urls = []
             # Find the latest CSV file
-            # The CSV file should be in the 'forum_threads' directory, which is at the same level as the 'spiders' directory.
             csv_file_path = self.find_latest_csv()
             self.logger.info(f"Using CSV file: {csv_file_path}")
             
@@ -115,7 +114,6 @@ class ClubAutohomeContentSpider(scrapy.Spider):
                         urls.append(thread)
                         self.logger.debug(f"Obtained URL: {thread['thread_link']} from CSV")
 
-            # Write back to CSV with proper encoding
             # self.write_to_csv(urls, csv_file_path)
 
             for url in urls:
@@ -125,51 +123,64 @@ class ClubAutohomeContentSpider(scrapy.Spider):
             self.logger.debug(f"Error while obtaining start requests: {e}")
 
     def parse(self, response):
-        """Parse individual posts. Currently only got the 1st place of the thread."""
-        # Log the URL being processed
+        """Parse the main post and all replies in a clubautohome thread, yielding an item for each."""
         self.logger.debug(f"Processing URL: {response.url}")
 
         # Use Selenium to load the page and wait for the post container
         self.driver.get(response.url)
         try:
             WebDriverWait(self.driver, 15).until(
-                EC.visibility_of_element_located((By.CSS_SELECTOR, "div.post-container"))
+                EC.visibility_of_element_located((By.CSS_SELECTOR, "section.fn-container"))
             )
-            self.logger.debug("Successfully found the post container element with Selenium")
+            self.logger.debug("Successfully found the post container section with Selenium")
         except WebDriverException as e:
             self.logger.error(f"Error loading page with Selenium: {e}")
             return
 
+        #while True: # Loop to handle pagination if needed
         selenium_response = scrapy.http.HtmlResponse(
-            url=response.url,
-            body=self.driver.page_source,
-            encoding='utf-8'
-        )
+                url=response.url, # no pagination, otherwise use self.driver.current_url to get the current URL after selenium loading the current page
+                body=self.driver.page_source,
+                encoding='utf-8'
+            )
 
-        post = selenium_response.css('div.post-container')
-        if not post:
-            self.logger.debug("No posts found with the selector 'div.post-container'")
-            return
+        # --- Main post ---
+        post = selenium_response.css('section.fn-container > div.post-wrap')
+        if post:
+            post_item = AutomationExpItem()
+            post_item['author_id'] = post.css('div.user-name > a.name::text').get()
+            post_item['date'] = response.meta.get('thread_date')
+            post_item['position'] = 1
+            paragraphs = post.css('div.tz-paragraph::text').getall()
+            concatenated_text = ''.join([p.strip() for p in paragraphs if p.strip()])
+            post_item['text'] = concatenated_text
+            post_item['thread_title'] = response.meta.get('thread_title')
+            post_item['thread_link'] = response.meta.get('thread_link') or response.url
+            yield post_item
+        else:
+            self.logger.debug("No post found with the selector 'div.post-wrap'")
+
+        # --- Replies ---
+        replies = selenium_response.css('section.fn-container > ul.reply-wrap > li.js-reply-floor-container')
+        for idx, reply in enumerate(replies, start=2):
+            reply_item = AutomationExpItem()
+            reply_item['author_id'] = reply.css('div.user-name > a.name::text').get()
+            reply_item['date'] = reply.css('span.reply-static-text > strong::text').get()
+            reply_item['position'] = idx
+            reply_item['text'] = reply.css('div.reply-detail > div::text').getall()
+            reply_item['thread_title'] = response.meta.get('thread_title')
+            reply_item['thread_link'] = response.meta.get('thread_link') or response.url
+            yield reply_item
+
+        # --- Pagination for replies --- temporarily disabled
         
-        post_item = AutomationExpItem()
-        post_item['author_id'] = selenium_response.css('div.user-name > a.name::text').get()
-        post_item['date'] = response.meta['thread_date']
-        post_item['position'] = 1
-        
-        # Extract and concatenate all texts from div.tz-paragraph
-        paragraphs = post.css('div.tz-paragraph::text').getall()
-        concatenated_text = ''.join([p.strip() for p in paragraphs if p.strip()])
-        post_item['text'] = concatenated_text
-        
-        post_item['thread_title'] = response.meta['thread_title']
-        post_item['thread_link'] = response.meta['thread_link']
-
-        # Ensure text content is properly decoded for Chinese characters
-        if post_item['text']:
-            post_item['text'] = post_item['text'].encode('utf-8').decode('utf-8', errors='ignore')
-
-        # Ensure thread title is properly decoded for Chinese characters
-        if post_item['thread_title']:
-            post_item['thread_title'] = post_item['thread_title'].encode('utf-8').decode('utf-8', errors='ignore')
-
-        yield post_item
+        #next_page = selenium_response.css('div.reply-page > a.page-item-next::attr(href)').get()
+        #if next_page:
+            #   next_page_url = response.urljoin(next_page)
+            #  self.logger.debug(f"Following next reply page: {next_page_url}")
+            # self.driver.get(next_page_url)
+            # Loop will continue with new page loaded
+        #else:
+            #   self.logger.debug("No more reply pages found.")
+            #  break
+            

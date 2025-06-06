@@ -136,7 +136,7 @@ class ClubAutohomeForumPostsSpider(scrapy.Spider):
         max_pagination_seconds = 60  #1 minutes per forum
 
         page_count = 0
-        while True:
+        while True: # Pagination loop
             # Timeout check
             if time.time() - pagination_start_time > max_pagination_seconds:
                 self.logger.warning(f"Pagination timeout after {max_pagination_seconds} seconds on forum: {forum_name}")
@@ -150,7 +150,7 @@ class ClubAutohomeForumPostsSpider(scrapy.Spider):
                 break
 
             selenium_response = scrapy.http.HtmlResponse(
-                url=response.url,
+                url=self.driver.current_url, # instead of response.url, use self.driver.current_url to get the current URL after selenium loading the current page
                 body=self.driver.page_source,
                 encoding='utf-8'
             )
