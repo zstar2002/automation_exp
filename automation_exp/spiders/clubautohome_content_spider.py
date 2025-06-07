@@ -12,6 +12,7 @@ from webdriver_manager.chrome import ChromeDriverManager
 import glob
 import chardet
 from automation_exp.items import AutomationExpItem
+import time
 
 class ClubAutohomeContentSpider(scrapy.Spider):
     name = "clubautohome_content_spider"
@@ -129,12 +130,27 @@ class ClubAutohomeContentSpider(scrapy.Spider):
         # Use Selenium to load the page and wait for the post container
         self.driver.get(response.url)
         try:
-            WebDriverWait(self.driver, 15).until(
-                EC.visibility_of_element_located((By.CSS_SELECTOR, "section.fn-container"))
+            # Wait for the post container to be present in the DOM
+            elem = WebDriverWait(self.driver, 15).until(
+                EC.presence_of_element_located((By.CSS_SELECTOR, "section.fn-container"))
             )
-            self.logger.debug("Successfully found the post container section with Selenium")
+            # Check if the element is visible
+            if not elem.is_displayed():
+                screenshot_path = os.path.join(
+                    os.path.dirname(os.path.abspath(__file__)),
+                    f"selenium_not_visible_{int(time.time())}.png"
+                )
+                self.driver.save_screenshot(screenshot_path)
+                self.logger.error(f"'section.fn-container' found but not visible. Screenshot saved to {screenshot_path}. Skipping URL.")
+                return
+            self.logger.debug("Successfully found the post container section with Selenium and it is visible.")
         except WebDriverException as e:
-            self.logger.error(f"Error loading page with Selenium: {e}")
+            screenshot_path = os.path.join(
+                os.path.dirname(os.path.abspath(__file__)),
+                f"selenium_error_{int(time.time())}.png"
+            )
+            self.driver.save_screenshot(screenshot_path)
+            self.logger.error(f"Error loading page with Selenium: {e}. Screenshot saved to {screenshot_path}")
             return
 
         #while True: # Loop to handle pagination if needed
@@ -183,4 +199,3 @@ class ClubAutohomeContentSpider(scrapy.Spider):
         #else:
             #   self.logger.debug("No more reply pages found.")
             #  break
-            
