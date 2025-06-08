@@ -48,7 +48,8 @@ class TiebaForumPostsSpider(scrapy.Spider):
 
         chrome_options = Options()
         chrome_options.add_argument('--log-level=3')
-        # chrome_options.add_argument("--headless")
+        #chrome_options.add_argument("--headless")
+        
         try:
             driver_path = r"C:\Users\maste\.wdm\drivers\chromedriver\win64\chromedriver-win64\chromedriver.exe"
             self.driver = webdriver.Chrome(
@@ -66,32 +67,34 @@ class TiebaForumPostsSpider(scrapy.Spider):
 
     def parse(self, response):
         self.logger.debug(f"Processing URL: {response.url}")
+        # Try to connect to the page by using Selenium
         try:
             self.driver.get(response.url)
             # Wait for the login pop-up and close it if present
             try:
                 # Adjust the selector below to match the close button of the Tieba login pop-up
-                close_btn = WebDriverWait(self.driver, 5).until(
-                    EC.element_to_be_clickable((By.CSS_SELECTOR, "div.login-dialog-close, .close, .close-btn"))
+                close_btn = WebDriverWait(self.driver, 10).until(
+                    EC.element_to_be_clickable((By.CSS_SELECTOR, "div.tang-pass-footerBar > span.close-btn"))
                 )
                 close_btn.click()
                 self.logger.info("Closed login pop-up.")
             except TimeoutException:
                 self.logger.info("No login pop-up appeared.")
-            # ...continue with your scraping logic...
+            # ...check whether the element of post list appears on the page...
+            try:
+                WebDriverWait(self.driver, 5).until(
+                    EC.visibility_of_element_located((By.CSS_SELECTOR, "div > ul#thread_list.threadlist_bright"))
+                )
+                self.logger.debug("Successfully found the thread list element")
+            except WebDriverException as e:
+                self.logger.error(f"Error loading page with Selenium: {e}")
+                return
+            # Yield the exception if the page is not loaded properly
         except Exception as e:
             self.logger.error(f"Error loading page: {e}")
             return
     
-        try:
-            WebDriverWait(self.driver, 15).until(
-                EC.visibility_of_element_located((By.CSS_SELECTOR, "div > ul#thread_list.threadlist_bright"))
-            )
-            self.logger.debug("Successfully found the thread list element")
-        except WebDriverException as e:
-            self.logger.error(f"Error loading page with Selenium: {e}")
-            return
-
+    # Extract forum name and URL from response meta
         forum_name = response.meta['forum']['name']
         forum_url = response.meta['forum']['url']
         if forum_name not in self.forum_stats:
@@ -123,6 +126,7 @@ class TiebaForumPostsSpider(scrapy.Spider):
             for post in posts:
                 post_title = post.css('a.j_th_tit::text').get()
                 post_link = post.css('a.j_th_tit::attr(href)').get()
+                post_reply_date = post.css('span.threadlist_reply_date::text').get()
                 if post_link and post_link.startswith('/'):
                     post_link = post_link[1:]
                 # Tieba does not always show post date on the list page, so skip date filtering if not available
@@ -133,7 +137,7 @@ class TiebaForumPostsSpider(scrapy.Spider):
                     yield {
                         'post_title': post_title,
                         'post_link': 'https://tieba.baidu.com/' + post_link.lstrip('/'),
-                        'post_date': None,         # Tieba does not offer thread creation date; only the date of last reply
+                        'post_date': post_reply_date,         # Tieba does not offer thread creation date; only the date of last reply
                         'forum_name': forum_name, 
                         'forum_url': forum_url
                     }
