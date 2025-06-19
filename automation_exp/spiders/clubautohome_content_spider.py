@@ -138,43 +138,44 @@ class ClubAutohomeContentSpider(scrapy.Spider):
             Yields:
                 scrapy.Request: A Scrapy request object for each thread link found in the CSV file, with thread metadata attached.
             """
-            # Ensure encoding is compatible with Chinese characters
-            if not encoding or (encoding and encoding.lower() not in ['utf-8', 'utf-16', 'gbk']):
-                self.logger.debug(f"Detected encoding {encoding} may not support Chinese characters. Defaulting to UTF-8.")
-                encoding = 'utf-8'
-            self.logger.info(f"Using CSV file: {csv_file_path}")
+            try:
+                urls = []
+                # Find the latest CSV file
+                csv_file_path = self.find_latest_csv()
             
-            # Detect the encoding of the CSV file
-            with open(csv_file_path, 'rb') as file:
-                raw_data = file.read()
-                result = chardet.detect(raw_data)
-                encoding = result['encoding']
-
-            # Ensure encoding is compatible with Chinese characters
-            if encoding.lower() not in ['utf-8', 'utf-16', 'gbk']:
-                self.logger.debug(f"Detected encoding {encoding} may not support Chinese characters. Defaulting to UTF-8.")
-                encoding = 'utf-8'
+                self.logger.info(f"Using CSV file: {csv_file_path}")
             
-            # Read the CSV file with the detected encoding
-            with open(csv_file_path, 'r', encoding=encoding) as file:
-                reader = csv.DictReader(file)
-                for row in reader:
-                    thread = {}
-                    # Use the correct column names based on the CSV file structure
-                    thread['thread_title'] = row.get('post_title')
-            self.logger.error(f"Error while obtaining start requests: {e}")
-                    thread['thread_date'] = row.get('post_date')
-                    if thread['thread_title'] and thread['thread_link']:
-                        urls.append(thread)
-                        self.logger.debug(f"Obtained URL: {thread['thread_link']} from CSV")
+                # Detect the encoding of the CSV file
+                with open(csv_file_path, 'rb') as file:
+                    raw_data = file.read()
+                    result = chardet.detect(raw_data)
+                    encoding = result['encoding']
 
-            # self.write_to_csv(urls, csv_file_path)
+                # Ensure encoding is compatible with Chinese characters
+                if not encoding or (encoding and encoding.lower() not in ['utf-8', 'utf-16', 'gbk']):
+                    self.logger.debug(f"Detected encoding {encoding} may not support Chinese characters. Defaulting to UTF-8.")
+                    encoding = 'utf-8'
+            
+                # Read the CSV file with the detected encoding
+                with open(csv_file_path, 'r', encoding=encoding) as file:
+                    reader = csv.DictReader(file)
+                    for row in reader:
+                        thread = {}
+                        # Use the correct column names based on the CSV file structure
+                        thread['thread_title'] = row.get('post_title')
+                        thread['thread_link'] = row.get('post_link')
+                        thread['thread_date'] = row.get('post_date')
+                        if thread['thread_title'] and thread['thread_link']:
+                            urls.append(thread)
+                            self.logger.debug(f"Obtained URL: {thread['thread_link']} from CSV")
 
-            for url in urls:
-                yield scrapy.Request(url=url['thread_link'], callback=self.parse, meta=url)
+                # self.write_to_csv(urls, csv_file_path)
+
+                for url in urls:
+                    yield scrapy.Request(url=url['thread_link'], callback=self.parse, meta=url)
         
-        except Exception as e:
-            self.logger.debug(f"Error while obtaining start requests: {e}")
+            except Exception as e:
+                self.logger.error(f"Error while obtaining start requests: {e}")
 
     def parse(self, response):
         """
@@ -235,9 +236,7 @@ class ClubAutohomeContentSpider(scrapy.Spider):
             post_item['date'] = response.meta.get('thread_date')
             post_item['position'] = 1
             paragraphs = post.css('div.tz-paragraph::text').getall()
-            paragraphs = reply.css('div.reply-detail > div::text').getall()
             concatenated_text = ''.join([p.strip() for p in paragraphs if p.strip()])
-            reply_item['text'] = concatenated_text
             post_item['text'] = concatenated_text
             post_item['thread_title'] = response.meta.get('thread_title')
             post_item['thread_link'] = response.meta.get('thread_link') or response.url
@@ -252,7 +251,9 @@ class ClubAutohomeContentSpider(scrapy.Spider):
             reply_item['author_id'] = reply.css('div.user-name > a.name::text').get()
             reply_item['date'] = reply.css('span.reply-static-text > strong::text').get()
             reply_item['position'] = idx
-            reply_item['text'] = reply.css('div.reply-detail > div::text').getall()
+            paragraphs = reply.css('div.reply-detail > div::text').getall()
+            concatenated_text = ''.join([p.strip() for p in paragraphs if p.strip()])
+            reply_item['text'] = concatenated_text
             reply_item['thread_title'] = response.meta.get('thread_title')
             reply_item['thread_link'] = response.meta.get('thread_link') or response.url
             yield reply_item
