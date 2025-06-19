@@ -87,6 +87,11 @@ Each spider run will create a new log file with the spider name and start time i
   - `tieba_forum_posts_spider.py`
   - `tieba_content_spider.py`
   - `test_clubautohome_automation.py`
+  - `run_clubautohome_content_spider.py`
+  - `run_clubautohome_forum_post_automation.py`
+  - `run_tieba_forum_posts_spider.py`
+  - `run_tieba_content_spider.py`
+  - `run_teslaownersonline_forum_post_automation.py`
 
 ### Output and Logging
 
@@ -134,6 +139,11 @@ Each spider run will create a new log file with the spider name and start time i
 - `C:\Users\maste\PythonProjects\automation_exp_log/`: Log files for each spider run. All logs are stored here, not in subfolders.
 - `configuration_files/<website>/`: Per-site configuration, keywords, and start URLs. **All config, keywords, and start_urls files must be here.**
 - `test_clubautohome_automation.py`: Script to run the clubautohome forum spider and save output automatically.
+- `run_clubautohome_content_spider.py`: Script to run the clubautohome content spider and save output automatically.
+- `run_clubautohome_forum_post_automation.py`: Script to run the clubautohome forum post spider and save output automatically.
+- `run_tieba_forum_posts_spider.py`: Script to run the Tieba forum posts spider and save output automatically.
+- `run_tieba_content_spider.py`: Script to run the Tieba content spider and save output automatically.
+- `run_teslaownersonline_forum_post_automation.py`: Script to run the Tesla Owners Online forum post spider and save output automatically.
 
 ## Customization
 
