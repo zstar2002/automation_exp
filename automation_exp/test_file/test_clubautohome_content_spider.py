@@ -3,7 +3,14 @@ import os
 from datetime import datetime
 
 def run_scrapy_spider():
-    """Run the Scrapy content spider and capture its output."""
+    """
+    Runs the Scrapy spider named 'clubautohome_content_spider', saving its output to a timestamped CSV file
+    and logging its execution to a timestamped log file. The output and log files are stored in dedicated
+    directories at the project root. Captures and prints the spider's standard output and error streams.
+    If the spider fails to run, prints the error output.
+    Raises:
+        subprocess.CalledProcessError: If the Scrapy spider process returns a non-zero exit status.
+    """
     # Get the current script directory
     current_dir = os.path.dirname(os.path.abspath(__file__))
     
@@ -41,5 +48,7 @@ def run_scrapy_spider():
 
 if __name__ == "__main__":
     run_scrapy_spider()
+
+
 
 
